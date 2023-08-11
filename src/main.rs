@@ -15,28 +15,29 @@ fn main() {
 
     // Creation of the computation thread
     std::thread::spawn(move || loop {
-        loop {
-            // When a new task is sent down the channel
-            let thread_task = rx_task.recv().unwrap();
-            let thread_tx_nb = tx_nb.clone();
+        println!("Début de la loop");
+        // When a new task is sent down the channel
+        let thread_task = rx_task.recv().unwrap();
+        let thread_tx_nb = tx_nb.clone();
 
-            // Spawn a worker thread for the task
-            std::thread::spawn(move || {
-                // Acquire the lock on the task
-                let mut task = thread_task.lock().unwrap();
+        println!("Lancement de la tâche");
+        // Spawn a worker thread for the task
+        std::thread::spawn(move || {
+            // Acquire the lock on the task
+            let mut task = thread_task.lock().unwrap();
 
-                // Compute it synchronously
-                let result = Some(task.compute() as usize);
+            // Compute it synchronously
+            let result = Some(task.compute() as usize);
 
-                println!("{:?}", result);
+            println!("{:?}", result);
 
-                // Update the result
-                task.result = result;
+            // Update the result
+            task.result = result;
 
-                // Tell the main thread a task is finished
-                thread_tx_nb.send(1).unwrap();
-            });
-        }
+            // Tell the main thread a task is finished
+            thread_tx_nb.send(1).unwrap();
+        });
+        println!("Fin de la loop");
     });
 
     let mut created = false;
